@@ -56,25 +56,19 @@ func getConfig() (error) {
 }
 
 func StartServer() {
-	// running side car
-	errorMessage, err = runSideCar()
-	if err != nil {
-		log.Fatal("could not get config")
+	if errorMessage, err = runSideCar(); err != nil {	// running side car
+		log.Fatal(errorMessage)
 	}
-
-	// initializing mux router
-	router := router.GetRouter(config.APIPrefix, config)
-	// initializing http server
-	srv := &http.Server{
-		Handler:      router,
+	
+	srv := &http.Server{	// initializing http server
+		Handler:      router.GetRouter(config.APIPrefix, config),	// initializing mux router
 		Addr:         serverEnv.Address,
 		WriteTimeout: time.Duration(serverEnv.WriteTimeout) * time.Second,
 		ReadTimeout:  time.Duration(serverEnv.ReadTimeout) * time.Second,
 	}
 	standardLogger.ServerEvent(fmt.Sprintf("server starting at %s", serverEnv.Address))
-	// starting server
-	err = srv.ListenAndServe()
-	if err != nil {
+
+	if err = srv.ListenAndServe(); err != nil { 	// starting server
 		standardLogger.Issue("couldn't start server")
 	}
 
