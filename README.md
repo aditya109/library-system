@@ -17,7 +17,5 @@
 3. Run the `go` server.
 
    ```bash
-   g
+   go run cmd/main.go
    ```
-
-   
