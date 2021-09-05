@@ -15,7 +15,7 @@ type DatabaseContext struct {
 	CollectionName string
 	Uri string
 }
-var standardLogger *logger.StandardLogger
+var standardLogger *logger.StandardLogger = logger.NewLogger()
 
 //GetMongoDbClient get connection of mongodb
 func GetMongoDbClient(uri string) (*mongo.Client, context.Context, error) {
@@ -38,8 +38,6 @@ func GetMongoDbClient(uri string) (*mongo.Client, context.Context, error) {
 }
 
 func GetMongoDbCollection(dctx DatabaseContext) (*mongo.Collection, context.Context, error) {
-	// initializing standard logger
-	standardLogger = logger.NewLogger()
 	client, ctx, err := GetMongoDbClient(dctx.Uri)
 	if err != nil {
 		return nil, nil, err
