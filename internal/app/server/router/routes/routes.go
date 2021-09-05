@@ -35,7 +35,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 	} else if ctx.config.EnvironmentType == "DEV" {
 		dbUri = ctx.config.DevEnvs.MongodbUri
 	}
-	if collection, hcontext, err = mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName, ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName, dbUri); err != nil {
+	if collection, hcontext, err = mongodb.GetMongoDbCollection(mongodb.DatabaseContext{DbName: ctx.config.DatabaseStrings.DatabaseName, CollectionName: ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName, Uri: dbUri}); err != nil {
 		standardLogger.Issue(err.Error())
 		return
 	}
