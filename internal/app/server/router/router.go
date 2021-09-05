@@ -17,11 +17,6 @@ func GetRouter(prefix string, config configs.Config) *mux.Router {
 		var route = routes[i]
 		router.HandleFunc(route.Path, route.HandlerFunction).Methods(route.MethodTypes...)
 	}
-
-	// router.HandleFunc("/api/v1/books", GetBooksHandler)
-	// router.HandleFunc("/api/v1/book/{id}", GetBookHandler)
-	// router.HandleFunc("/api/v1/books", AddBooksHandler)
-	// router.HandleFunc("/api/v1/book", AddBookHandler)
 	http.Handle("/", router)
 	return router
 }

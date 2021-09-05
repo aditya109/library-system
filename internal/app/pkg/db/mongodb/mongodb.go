@@ -10,7 +10,12 @@ import (
 	"library-server/pkg/logger"
 )
 
-var standardLogger *logger.StandardLogger
+type DatabaseContext struct {
+	DbName string
+	CollectionName string
+	Uri string
+}
+var standardLogger *logger.StandardLogger = logger.NewLogger()
 
 //GetMongoDbClient get connection of mongodb
 func GetMongoDbClient(uri string) (*mongo.Client, context.Context, error) {
@@ -29,33 +34,14 @@ func GetMongoDbClient(uri string) (*mongo.Client, context.Context, error) {
 		standardLogger.Issue(err.Error())
 		return nil, nil, err
 	}
-	// defer client.Disconnect(ctx)
 	return client, ctx, nil
 }
 
-// func CloseClientDB(client *mongo.Client) {
-// 	if client == nil {
-// 		return
-// 	}
-
-// 	err := client.Disconnect(context.TODO())
-// 	if err != nil {
-// 		standardLogger.Issue(err.Error())
-// 	}
-
-// 	standardLogger.ServerEvent("Connection to MongoDB closed.")
-// }
-
-func GetMongoDbCollection(dbName string, collectionName string, uri string) (*mongo.Collection, context.Context, error) {
-	// initializing standard logger
-	standardLogger = logger.NewLogger()
-	client, ctx, err := GetMongoDbClient(uri)
-
+func GetMongoDbCollection(dctx DatabaseContext) (*mongo.Collection, context.Context, error) {
+	client, ctx, err := GetMongoDbClient(dctx.Uri)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	collection := client.Database(dbName).Collection(collectionName)
-
+	collection := client.Database(dctx.DbName).Collection(dctx.CollectionName)
 	return collection, ctx, nil
 }

@@ -1,6 +1,9 @@
 package logger
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,6 +14,12 @@ type Event struct {
 
 type StandardLogger struct {
 	*logrus.Logger
+}
+
+type LoggerContext struct {
+	W       http.ResponseWriter
+	Message string
+	Status  int
 }
 
 func NewLogger() *StandardLogger {
@@ -67,4 +76,11 @@ func (l *StandardLogger) MissingArg(argumentName string) {
 
 func (l *StandardLogger) DatabaseEvent(argumentName string) {
 	l.Errorf(databaseEventMessage.message, argumentName)
+}
+
+func RaiseAlert(lctx LoggerContext) {
+	log := NewLogger()
+	lctx.W.WriteHeader(http.StatusInternalServerError)
+	log.Issue(lctx.Message)
+	fmt.Fprintf(lctx.W, "%s", lctx.Message)
 }
