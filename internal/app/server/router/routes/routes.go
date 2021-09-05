@@ -74,7 +74,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:     ctx,
 			FilterParam: "bookid",
 		}
-		handlers.GetBookHandler(w, r, hctx)
+		handlers.GetBookByBookIdHandler(w, r, hctx)
 
 	case "GetBookByBookNameHandler":
 		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
@@ -89,7 +89,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:     ctx,
 			FilterParam: "bookname",
 		}
-		handlers.GetBookHandler(w, r, hctx)
+		handlers.GetBookByBookNameHandler(w, r, hctx)
 
 	case "GetBookByIsbnHandler":
 		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
@@ -104,7 +104,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:     ctx,
 			FilterParam: "isbn",
 		}
-		handlers.GetBookHandler(w, r, hctx)
+		handlers.GetBookByIsbnHandler(w, r, hctx)
 
 	case "GetBookByPriceHandler":
 		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
@@ -119,7 +119,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:     ctx,
 			FilterParam: "price",
 		}
-		handlers.GetBookHandler(w, r, hctx)
+		handlers.GetBookByPriceHandler(w, r, hctx)
 
 	case "GetBookByBookAuthorNameHandler":
 		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
@@ -134,7 +134,7 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:     ctx,
 			FilterParam: "bookauthor",
 		}
-		handlers.GetBookHandler(w, r, hctx)
+		handlers.GetBookByBookAuthorNameHandler(w, r, hctx)
 
 	case "AddBooksHandler":
 		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
@@ -149,7 +149,6 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 			Context:    ctx,
 		}
 		handlers.AddBooksHandler(w, r, hctx)
-
 	}
 }
 

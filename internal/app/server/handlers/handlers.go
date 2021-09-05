@@ -8,10 +8,7 @@ import (
 	"library-server/internal/app/server/repositories/bookrepository"
 	"library-server/pkg/logger"
 	"net/http"
-	"strconv"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,7 +28,7 @@ var log = logger.NewLogger()
 func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
 	var book models.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
-		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
+		logger.RaiseAlert(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: nil}, book); err != nil {
@@ -51,69 +48,59 @@ func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	w.Header().Set("Content-Type", "application/json")
 	var books []models.Book
 	if books, err = bookrepository.GetAllBooks(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}); err != nil {
-		return 
+		return
 	}
 	json.NewEncoder(w).Encode(books)
 }
 
-func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
-	var collection *mongo.Collection
-	var log *logger.StandardLogger
-	var err error
+// GetBookByBookIdHandler gets first book based on bookid
+func GetBookByBookIdHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
 	var book models.Book
-	var filter bson.M
-	collection = ctx.Collection
-	log = logger.NewLogger()
-	filterParam := ctx.FilterParam
 	w.Header().Set("Content-Type", "application/json")
-	switch filterParam { // filters
-	case "bookid":
-		bookId, err := strconv.Atoi(r.URL.Query().Get("bookid"))
-		if err != nil {
-			logger.RaiseAlert(w, log, fmt.Sprintf("error while casting bookid: %s", err.Error()), http.StatusInternalServerError)
-			return
-		}
-		filter = bson.M{filterParam: bookId}
-	case "bookname":
-		bookName := r.URL.Query().Get("bookname")
-		filter = bson.M{
-			filterParam: bson.M{
-				"$regex": primitive.Regex{
-					Pattern: bookName,
-					Options: "i",
-				},
-			},
-		}
-	case "price":
-		price, err := strconv.ParseFloat(r.URL.Query().Get("price"), 64)
-		if err != nil {
-			logger.RaiseAlert(w, log, fmt.Sprintf("error while casting price: %s", err.Error()), http.StatusInternalServerError)
-			return
-		}
-		filter = bson.M{filterParam: price}
-	case "isbn":
-		isbn := r.URL.Query().Get("isbn")
-		filter = bson.M{
-			filterParam: bson.M{
-				"$regex": primitive.Regex{
-					Pattern: isbn,
-					Options: "i",
-				},
-			},
-		}
-	case "bookauthor":
-		bookAuthor := r.URL.Query().Get("bookauthor")
-		filter = bson.M{
-			filterParam: bson.M{
-				"$regex": primitive.Regex{
-					Pattern: bookAuthor,
-					Options: "i",
-				},
-			},
-		}
+	if book, err = bookrepository.GetBookByBookId(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("bookid")); err != nil {
+		return
 	}
-	if err = collection.FindOne(ctx.Context, filter).Decode(&book); err != nil {
-		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
+	json.NewEncoder(w).Encode(book)
+}
+
+// GetBookByBookNameHandler gets first book based on bookname
+func GetBookByBookNameHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
+	var book models.Book
+	w.Header().Set("Content-Type", "application/json")
+	if book, err = bookrepository.GetBookByBookName(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("bookname")); err != nil {
+		return
+	}
+	json.NewEncoder(w).Encode(book)
+	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
+}
+
+// GetBookByBookAuthorHandler gets first book based on book author name
+func GetBookByBookAuthorNameHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
+	var book models.Book
+	w.Header().Set("Content-Type", "application/json")
+	if book, err = bookrepository.GetBookByBookAuthorName(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("bookauthor")); err != nil {
+		return
+	}
+	json.NewEncoder(w).Encode(book)
+	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
+}
+
+// GetBookByIsbnHandler gets first book based on isbn
+func GetBookByIsbnHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
+	var book models.Book
+	w.Header().Set("Content-Type", "application/json")
+	if book, err = bookrepository.GetBookByIsbn(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("isbn")); err != nil {
+		return
+	}
+	json.NewEncoder(w).Encode(book)
+	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
+}
+
+// GetBookByPriceHandler get first book based on price
+func GetBookByPriceHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
+	var book models.Book
+	w.Header().Set("Content-Type", "application/json")
+	if book, err = bookrepository.GetBookByPrice(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("price")); err != nil {
 		return
 	}
 	json.NewEncoder(w).Encode(book)
@@ -126,7 +113,7 @@ func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	var booksAsSlice []models.Book
 	err := json.NewDecoder(r.Body).Decode(&booksAsSlice)
 	if err != nil {
-		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
+		logger.RaiseAlert(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var booksAsInterfaceSlice []interface{} = make([]interface{}, len(booksAsSlice))
@@ -135,7 +122,7 @@ func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	}
 
 	if _, err := collection.InsertMany(context.Background(), booksAsInterfaceSlice); err != nil {
-		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
+		logger.RaiseAlert(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintf(w, "Book records sucessully injected : %d", len(booksAsSlice))

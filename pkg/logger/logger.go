@@ -72,7 +72,8 @@ func (l *StandardLogger) DatabaseEvent(argumentName string) {
 	l.Errorf(databaseEventMessage.message, argumentName)
 }
 
-func RaiseAlert(w http.ResponseWriter, log *StandardLogger, message string, status int) {
+func RaiseAlert(w http.ResponseWriter, message string, status int) {
+	log := NewLogger()
 	w.WriteHeader(http.StatusInternalServerError)
 	log.Issue(message)
 	fmt.Fprintf(w, "%s", message)
