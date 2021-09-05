@@ -27,49 +27,33 @@ var (
 )
 var log = logger.NewLogger()
 
+// AddBookHandler inserts one book into the table `books`
 func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
 	var book models.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{Book: book, Collection: ctx.Collection, W: w, Log: log}); err != nil {
+	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: nil}, book); err != nil {
 		return
 	}
 	fmt.Fprintf(w, "Book record sucessully injected : %s", response)
 }
 
+// WelcomeHandler
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Welcome handler is working fine")
 }
 
+// GetBooksHandler gets all the books and returns paginated response
 func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
-	collection := ctx.Collection
-	log := logger.NewLogger()
 	w.Header().Set("Content-Type", "application/json")
 	var books []models.Book
-	cursor, err := collection.Find(ctx.Context, bson.M{}) // bson.M{}, we passes empty filter, so we can get all the data
-	if err != nil {
-		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
-		return
-	}
-	defer cursor.Close(context.TODO())
-	for cursor.Next(context.TODO()) {
-		var book models.Book
-		err := cursor.Decode(&book)
-		if err != nil {
-			logger.RaiseAlert(w, log, fmt.Sprintf("error while reading stream data from database: %s", err.Error()), http.StatusInternalServerError)
-			return
-		}
-		books = append(books, book)
-	}
-	if err := cursor.Err(); err != nil {
-		logger.RaiseAlert(w, log, fmt.Sprintf("error while parsing cursor: %s", err.Error()), http.StatusInternalServerError)
-		return
+	if books, err = bookrepository.GetAllBooks(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}); err != nil {
+		return 
 	}
 	json.NewEncoder(w).Encode(books)
-	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books: %d", len(books)))
 }
 
 func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
