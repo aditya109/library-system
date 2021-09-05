@@ -108,11 +108,8 @@ func GetBookByPriceHandler(w http.ResponseWriter, r *http.Request, ctx HandlerCo
 }
 
 func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
-	collection := ctx.Collection
-	log := logger.NewLogger()
 	var booksAsSlice []models.Book
-	err := json.NewDecoder(r.Body).Decode(&booksAsSlice)
-	if err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&booksAsSlice); err != nil {
 		logger.RaiseAlert(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -120,11 +117,8 @@ func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	for i, d := range booksAsSlice {
 		booksAsInterfaceSlice[i] = d
 	}
-
-	if _, err := collection.InsertMany(context.Background(), booksAsInterfaceSlice); err != nil {
-		logger.RaiseAlert(w, err.Error(), http.StatusInternalServerError)
-		return
+	if _ ,err = bookrepository.InsertMultipleBook(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, booksAsInterfaceSlice); err != nil {
+		return 
 	}
 	fmt.Fprintf(w, "Book records sucessully injected : %d", len(booksAsSlice))
-	log.DatabaseEvent(fmt.Sprintf("Insert successful, #Books: %d", len(booksAsSlice)))
 }

@@ -113,6 +113,15 @@ func GetBookByPrice(ctx BookRepositoryContext, param string, amt string) (models
 	}
 }
 
+func InsertMultipleBook(ctx BookRepositoryContext, books []interface{}) ([]byte, error) {
+	if _, err := ctx.Collection.InsertMany(context.Background(), books); err != nil {
+		logger.RaiseAlert(ctx.W, err.Error(), http.StatusInternalServerError)
+		return nil, err
+	}
+	log.DatabaseEvent(fmt.Sprintf("Insert successful, #Books: %d", len(books)))
+	return nil, nil
+}
+
 func FindBookByFilter(ctx BookRepositoryContext, filter bson.M) (models.Book, error) {
 	if err = ctx.Collection.FindOne(ctx.Context, filter).Decode(&book); err != nil {
 		logger.RaiseAlert(ctx.W, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
