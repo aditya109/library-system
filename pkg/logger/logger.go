@@ -56,7 +56,7 @@ func (l *StandardLogger) Issue(argumentName string) {
 }
 
 func (l *StandardLogger) ServerEvent(argumentName string) {
-	l.Errorf(serverEventMessage.message, argumentName)
+	l.Infof(serverEventMessage.message, argumentName)
 }
 
 // InvalidArg is a standard error message

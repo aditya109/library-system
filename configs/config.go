@@ -2,6 +2,7 @@ package configs
 
 import (
 	"encoding/json"
+	"fmt"
 	li "library-server/pkg/logger"
 	"os"
 )
@@ -28,6 +29,7 @@ type Config struct {
 
 func LoadConfiguration(filePath string, standardLogger *li.StandardLogger) (Config, string, error) {
 	var config Config
+	fmt.Println(filePath)
 	configFile, err := os.Open(filePath)
 	if err != nil {
 		return config, "issue in while loading configuration file", err
