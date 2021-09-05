@@ -33,12 +33,7 @@ func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{
-		Book:       book,
-		Collection: ctx.Collection,
-		W:          w,
-		Log:        log,
-	}); err != nil {
+	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{Book: book, Collection: ctx.Collection, W: w, Log: log}); err != nil {
 		return
 	}
 	fmt.Fprintf(w, "Book record sucessully injected : %s", response)
