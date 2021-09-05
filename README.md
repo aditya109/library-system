@@ -1,4 +1,5 @@
 # go-server
+[![BCH compliance](https://bettercodehub.com/edge/badge/aditya109/library-system?branch=main)](https://bettercodehub.com/)
 
 ## How to run server ?
 
