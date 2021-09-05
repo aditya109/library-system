@@ -16,6 +16,12 @@ type StandardLogger struct {
 	*logrus.Logger
 }
 
+type LoggerContext struct {
+	W       http.ResponseWriter
+	Message string
+	Status  int
+}
+
 func NewLogger() *StandardLogger {
 	var baseLogger = logrus.New()
 	var standardLogger = &StandardLogger{baseLogger}
@@ -72,9 +78,9 @@ func (l *StandardLogger) DatabaseEvent(argumentName string) {
 	l.Errorf(databaseEventMessage.message, argumentName)
 }
 
-func RaiseAlert(w http.ResponseWriter, message string, status int) {
+func RaiseAlert(lctx LoggerContext) {
 	log := NewLogger()
-	w.WriteHeader(http.StatusInternalServerError)
-	log.Issue(message)
-	fmt.Fprintf(w, "%s", message)
+	lctx.W.WriteHeader(http.StatusInternalServerError)
+	log.Issue(lctx.Message)
+	fmt.Fprintf(lctx.W, "%s", lctx.Message)
 }

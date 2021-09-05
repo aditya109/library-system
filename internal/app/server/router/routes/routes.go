@@ -39,42 +39,39 @@ func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWri
 		standardLogger.Issue(err.Error())
 		return
 	}
-	hctx := handlers.HandlerContext{Collection: collection, Context: hcontext}
+	hctx := handlers.HandlerContext{Collection: collection, Context: hcontext, W: w, R: r}
 	switch ctx.handlerName {
 	case "WelcomeHandler":
-		handlers.WelcomeHandler(w, r)
+		handlers.WelcomeHandler(hctx)
 
 	case "AddBookHandler":
-		handlers.AddBookHandler(w, r, hctx)
+		handlers.AddBookHandler(hctx)
 
 	case "AddBooksHandler":
-		handlers.AddBooksHandler(w, r, hctx)
+		handlers.AddBooksHandler(hctx)
 
 	case "GetBooksHandler":
-		handlers.GetBooksHandler(w, r, hctx)
+		handlers.GetBooksHandler(hctx)
 
 	case "GetBookByBookIdHandler":
 		hctx.FilterParam = "bookid"
-		handlers.GetBookByBookIdHandler(w, r, hctx)
+		handlers.GetBookByBookIdHandler(hctx)
 
 	case "GetBookByBookNameHandler":
 		hctx.FilterParam = "bookname"
-		fmt.Println("Came here 1 !")
-		handlers.GetBookByBookNameHandler(w, r, hctx)
+		handlers.GetBookByBookNameHandler(hctx)
 
 	case "GetBookByIsbnHandler":
 		hctx.FilterParam = "isbn"
-		handlers.GetBookByIsbnHandler(w, r, hctx)
+		handlers.GetBookByIsbnHandler(hctx)
 
 	case "GetBookByPriceHandler":
 		hctx.FilterParam = "price"
-		handlers.GetBookByPriceHandler(w, r, hctx)
+		handlers.GetBookByPriceHandler(hctx)
 
 	case "GetBookByBookAuthorNameHandler":
 		hctx.FilterParam = "bookauthor"
-		handlers.GetBookByBookAuthorNameHandler(w, r, hctx)
-
-
+		handlers.GetBookByBookAuthorNameHandler(hctx)
 	}
 }
 
