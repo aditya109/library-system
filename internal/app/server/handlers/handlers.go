@@ -21,20 +21,24 @@ type HandlerContext struct {
 	FilterParam string
 }
 
+var (
+	response []byte
+	err      error
+)
+var log = logger.NewLogger()
+
 func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
-	log := logger.NewLogger()
 	var book models.Book
 	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
 		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	response, err := bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{
+	if response, err = bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{
 		Book:       book,
 		Collection: ctx.Collection,
 		W:          w,
 		Log:        log,
-	})
-	if err != nil {
+	}); err != nil {
 		return
 	}
 	fmt.Fprintf(w, "Book record sucessully injected : %s", response)
