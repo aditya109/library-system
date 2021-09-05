@@ -16,6 +16,8 @@ var (
 	response []byte
 	err      error
 	cursor   *mongo.Cursor
+	books    []models.Book
+	book     models.Book
 )
 
 type BookRepositoryContext struct {
@@ -41,7 +43,6 @@ func InsertOneBook(ctx BookRepositoryContext, book models.Book) ([]byte, error) 
 }
 
 func GetAllBooks(ctx BookRepositoryContext) ([]models.Book, error) {
-	var books []models.Book
 	if cursor, err = ctx.Collection.Find(ctx.Context, bson.M{}); err != nil { // bson.M{}, we passes empty filter, so we can get all the data
 		logger.RaiseAlert(ctx.W, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
 		return nil, err
@@ -53,12 +54,12 @@ func GetAllBooks(ctx BookRepositoryContext) ([]models.Book, error) {
 	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books: %d", len(books)))
 	return books, nil
 }
+
 /**
 =========HELPER FUNCTIONS============
 */
 
 func convertBooksDbResponseToModelBook(ctx BookRepositoryContext) ([]models.Book, error) {
-	var books []models.Book
 	for cursor.Next(context.TODO()) {
 		var book models.Book
 		if err = cursor.Decode(&book); err != nil {
