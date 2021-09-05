@@ -21,39 +21,23 @@ type HandlerContext struct {
 }
 
 func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
-	collection := ctx.Collection
 	log := logger.NewLogger()
 	var book models.Book
-	err := json.NewDecoder(r.Body).Decode(&book)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Issue(err.Error())
-		fmt.Fprintf(w, "%s", err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	res, err := ctx.Collection.InsertOne(context.Background(), book)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Issue(err.Error())
-		fmt.Fprintf(w, "%s", err.Error())
+		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	res, err := collection.InsertOne(context.Background(), book)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-
 	response, err := json.Marshal(res)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err.Error())
+		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintf(w, "Book record sucessully injected : %s", response)
-	fmt.Println(book.BookId)
 	log.DatabaseEvent(fmt.Sprintf("Insert successful, BookID: %d", book.BookId))
 }
 
@@ -73,9 +57,7 @@ func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	// bson.M{}, we passes empty filter, so we can get all the data
 	cursor, err := collection.Find(ctx.Context, bson.M{})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.DatabaseEvent(fmt.Sprintf("error while fetching data from database: %s", err.Error()))
-		fmt.Fprintf(w, "error while fetching data from database: %s", err.Error())
+		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -85,17 +67,13 @@ func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 		var book models.Book
 		err := cursor.Decode(&book)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.DatabaseEvent(fmt.Sprintf("error while reading stream data from database: %s", err.Error()))
-			fmt.Fprintf(w, "error while reading stream data from database: %s", err.Error())
+			logger.RaiseAlert(w, log, fmt.Sprintf("error while reading stream data from database: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		books = append(books, book)
 	}
 	if err := cursor.Err(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.DatabaseEvent(fmt.Sprintf("error while parsing cursor: %s", err.Error()))
-		fmt.Fprintf(w, "error while parsing cursor: %s", err.Error())
+		logger.RaiseAlert(w, log, fmt.Sprintf("error while parsing cursor: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(books)
@@ -121,9 +99,7 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 	case "bookid":
 		bookId, err := strconv.Atoi(r.URL.Query().Get("bookid"))
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.DatabaseEvent(fmt.Sprintf("error while casting bookid: %s", err.Error()))
-			fmt.Fprintf(w, "error while casting bookid: %s", err.Error())
+			logger.RaiseAlert(w, log, fmt.Sprintf("error while casting bookid: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		filter = bson.M{filterParam: bookId}
@@ -142,9 +118,7 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 	case "price":
 		price, err := strconv.ParseFloat(r.URL.Query().Get("price"), 64)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.DatabaseEvent(fmt.Sprintf("error while casting price: %s", err.Error()))
-			fmt.Fprintf(w, "error while casting price: %s", err.Error())
+			logger.RaiseAlert(w, log, fmt.Sprintf("error while casting price: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		filter = bson.M{filterParam: price}
@@ -173,9 +147,7 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 
 	}
 	if err = collection.FindOne(ctx.Context, filter).Decode(&book); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.DatabaseEvent(fmt.Sprintf("error while fetching data from database: %s", err.Error()))
-		fmt.Fprintf(w, "error while fetching data from database: %s", err.Error())
+		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(book)
@@ -189,16 +161,7 @@ func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	var booksAsSlice []models.Book
 	err := json.NewDecoder(r.Body).Decode(&booksAsSlice)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Issue(err.Error())
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Issue(err.Error())
-		fmt.Fprintf(w, "%s", err.Error())
+		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var booksAsInterfaceSlice []interface{} = make([]interface{}, len(booksAsSlice))
@@ -207,14 +170,7 @@ func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 	}
 
 	if _, err := collection.InsertMany(context.Background(), booksAsInterfaceSlice); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "%s", err.Error())
+		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintf(w, "Book records sucessully injected : %d", len(booksAsSlice))

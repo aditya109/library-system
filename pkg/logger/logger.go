@@ -1,6 +1,9 @@
 package logger
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -67,4 +70,10 @@ func (l *StandardLogger) MissingArg(argumentName string) {
 
 func (l *StandardLogger) DatabaseEvent(argumentName string) {
 	l.Errorf(databaseEventMessage.message, argumentName)
+}
+
+func RaiseAlert(w http.ResponseWriter, log *StandardLogger, message string, status int) {
+	w.WriteHeader(http.StatusInternalServerError)
+	log.Issue(message)
+	fmt.Fprintf(w, "%s", message)
 }
