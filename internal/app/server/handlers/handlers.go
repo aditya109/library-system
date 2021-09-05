@@ -65,13 +65,13 @@ func GetBookByBookIdHandler(w http.ResponseWriter, r *http.Request, ctx HandlerC
 
 // GetBookByBookNameHandler gets first book based on bookname
 func GetBookByBookNameHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
+	fmt.Println("Came here 1 !")
 	var book models.Book
 	w.Header().Set("Content-Type", "application/json")
 	if book, err = bookrepository.GetBookByBookName(bookrepository.BookRepositoryContext{Collection: ctx.Collection, W: w, Context: ctx.Context}, ctx.FilterParam, r.URL.Query().Get("bookname")); err != nil {
 		return
 	}
 	json.NewEncoder(w).Encode(book)
-	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
 }
 
 // GetBookByBookAuthorHandler gets first book based on book author name
@@ -82,7 +82,6 @@ func GetBookByBookAuthorNameHandler(w http.ResponseWriter, r *http.Request, ctx 
 		return
 	}
 	json.NewEncoder(w).Encode(book)
-	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
 }
 
 // GetBookByIsbnHandler gets first book based on isbn
@@ -93,7 +92,6 @@ func GetBookByIsbnHandler(w http.ResponseWriter, r *http.Request, ctx HandlerCon
 		return
 	}
 	json.NewEncoder(w).Encode(book)
-	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
 }
 
 // GetBookByPriceHandler get first book based on price
@@ -104,7 +102,6 @@ func GetBookByPriceHandler(w http.ResponseWriter, r *http.Request, ctx HandlerCo
 		return
 	}
 	json.NewEncoder(w).Encode(book)
-	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
 }
 
 func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {

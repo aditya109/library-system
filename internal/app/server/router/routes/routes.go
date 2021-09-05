@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -8,6 +9,8 @@ import (
 	"library-server/internal/app/pkg/db/mongodb"
 	"library-server/internal/app/server/handlers"
 	"library-server/pkg/logger"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Route struct {
@@ -21,134 +24,57 @@ type RoutingContext struct {
 	handlerName string
 }
 
-func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWriter, r *http.Request) {
-	var dbUri string
-	standardLogger := logger.NewLogger()
-	if ctx.config.EnvironmentType == "PROD" {
+var err error
+var collection *mongo.Collection
+var hcontext context.Context
+var standardLogger = logger.NewLogger()
+var dbUri string
 
+func (ctx RoutingContext) RouteToCorrespondingHandlerFunction(w http.ResponseWriter, r *http.Request) {
+	if ctx.config.EnvironmentType == "PROD" {
 	} else if ctx.config.EnvironmentType == "DEV" {
 		dbUri = ctx.config.DevEnvs.MongodbUri
 	}
+	if collection, hcontext, err = mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName, ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName, dbUri); err != nil {
+		standardLogger.Issue(err.Error())
+		return
+	}
+	hctx := handlers.HandlerContext{Collection: collection, Context: hcontext}
 	switch ctx.handlerName {
 	case "WelcomeHandler":
 		handlers.WelcomeHandler(w, r)
 
 	case "AddBookHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection: collection,
-			Context:    ctx,
-		}
 		handlers.AddBookHandler(w, r, hctx)
 
+	case "AddBooksHandler":
+		handlers.AddBooksHandler(w, r, hctx)
+
 	case "GetBooksHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection: collection,
-			Context:    ctx,
-		}
 		handlers.GetBooksHandler(w, r, hctx)
 
 	case "GetBookByBookIdHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection:  collection,
-			Context:     ctx,
-			FilterParam: "bookid",
-		}
+		hctx.FilterParam = "bookid"
 		handlers.GetBookByBookIdHandler(w, r, hctx)
 
 	case "GetBookByBookNameHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection:  collection,
-			Context:     ctx,
-			FilterParam: "bookname",
-		}
+		hctx.FilterParam = "bookname"
+		fmt.Println("Came here 1 !")
 		handlers.GetBookByBookNameHandler(w, r, hctx)
 
 	case "GetBookByIsbnHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection:  collection,
-			Context:     ctx,
-			FilterParam: "isbn",
-		}
+		hctx.FilterParam = "isbn"
 		handlers.GetBookByIsbnHandler(w, r, hctx)
 
 	case "GetBookByPriceHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection:  collection,
-			Context:     ctx,
-			FilterParam: "price",
-		}
+		hctx.FilterParam = "price"
 		handlers.GetBookByPriceHandler(w, r, hctx)
 
 	case "GetBookByBookAuthorNameHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection:  collection,
-			Context:     ctx,
-			FilterParam: "bookauthor",
-		}
+		hctx.FilterParam = "bookauthor"
 		handlers.GetBookByBookAuthorNameHandler(w, r, hctx)
 
-	case "AddBooksHandler":
-		collection, ctx, err := mongodb.GetMongoDbCollection(ctx.config.DatabaseStrings.DatabaseName,
-			ctx.config.DatabaseStrings.DatabaseCollections.BooksCollectionName,
-			dbUri)
-		if err != nil {
-			standardLogger.Issue(err.Error())
-			return
-		}
-		hctx := handlers.HandlerContext{
-			Collection: collection,
-			Context:    ctx,
-		}
-		handlers.AddBooksHandler(w, r, hctx)
+
 	}
 }
 
@@ -200,6 +126,5 @@ func GetRoutes(prefix string, config configs.Config) []Route {
 			MethodTypes:     []string{"POST"},
 		},
 	}
-
 	return routes
 }

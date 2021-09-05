@@ -118,7 +118,6 @@ func InsertMultipleBook(ctx BookRepositoryContext, books []interface{}) ([]byte,
 		logger.RaiseAlert(ctx.W, err.Error(), http.StatusInternalServerError)
 		return nil, err
 	}
-	log.DatabaseEvent(fmt.Sprintf("Insert successful, #Books: %d", len(books)))
 	return nil, nil
 }
 
