@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"library-server/internal/app/server/models"
+	"library-server/internal/app/server/repositories/bookrepository"
 	"library-server/pkg/logger"
 	"net/http"
 	"strconv"
@@ -27,18 +28,16 @@ func AddBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := ctx.Collection.InsertOne(context.Background(), book)
+	response, err := bookrepository.InsertOneBook(bookrepository.BookRepositoryContext{
+		Book:       book,
+		Collection: ctx.Collection,
+		W:          w,
+		Log:        log,
+	})
 	if err != nil {
-		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	response, err := json.Marshal(res)
-	if err != nil {
-		logger.RaiseAlert(w, log, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	fmt.Fprintf(w, "Book record sucessully injected : %s", response)
-	log.DatabaseEvent(fmt.Sprintf("Insert successful, BookID: %d", book.BookId))
 }
 
 func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,20 +48,14 @@ func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
 	collection := ctx.Collection
 	log := logger.NewLogger()
-
 	w.Header().Set("Content-Type", "application/json")
-
 	var books []models.Book
-
-	// bson.M{}, we passes empty filter, so we can get all the data
-	cursor, err := collection.Find(ctx.Context, bson.M{})
+	cursor, err := collection.Find(ctx.Context, bson.M{}) // bson.M{}, we passes empty filter, so we can get all the data
 	if err != nil {
 		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-
 	defer cursor.Close(context.TODO())
-
 	for cursor.Next(context.TODO()) {
 		var book models.Book
 		err := cursor.Decode(&book)
@@ -77,7 +70,6 @@ func GetBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext)
 		return
 	}
 	json.NewEncoder(w).Encode(books)
-
 	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books: %d", len(books)))
 }
 
@@ -87,15 +79,11 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 	var err error
 	var book models.Book
 	var filter bson.M
-
 	collection = ctx.Collection
 	log = logger.NewLogger()
 	filterParam := ctx.FilterParam
-
 	w.Header().Set("Content-Type", "application/json")
-	// filters
-
-	switch filterParam {
+	switch filterParam { // filters
 	case "bookid":
 		bookId, err := strconv.Atoi(r.URL.Query().Get("bookid"))
 		if err != nil {
@@ -103,7 +91,6 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 			return
 		}
 		filter = bson.M{filterParam: bookId}
-
 	case "bookname":
 		bookName := r.URL.Query().Get("bookname")
 		filter = bson.M{
@@ -114,7 +101,6 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 				},
 			},
 		}
-
 	case "price":
 		price, err := strconv.ParseFloat(r.URL.Query().Get("price"), 64)
 		if err != nil {
@@ -122,7 +108,6 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 			return
 		}
 		filter = bson.M{filterParam: price}
-
 	case "isbn":
 		isbn := r.URL.Query().Get("isbn")
 		filter = bson.M{
@@ -133,7 +118,6 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 				},
 			},
 		}
-
 	case "bookauthor":
 		bookAuthor := r.URL.Query().Get("bookauthor")
 		filter = bson.M{
@@ -144,17 +128,15 @@ func GetBookHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) 
 				},
 			},
 		}
-
 	}
 	if err = collection.FindOne(ctx.Context, filter).Decode(&book); err != nil {
 		logger.RaiseAlert(w, log, fmt.Sprintf("error while fetching data from database: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 	json.NewEncoder(w).Encode(book)
-
 	log.DatabaseEvent(fmt.Sprintf("Fetch successful, #books ID: %d", book.BookId))
-
 }
+
 func AddBooksHandler(w http.ResponseWriter, r *http.Request, ctx HandlerContext) {
 	collection := ctx.Collection
 	log := logger.NewLogger()
