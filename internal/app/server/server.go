@@ -52,6 +52,7 @@ func getConfig() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(filePath)
 	config, errorMessage, err = configs.LoadConfiguration(strings.Split(filePath, " <nil>")[0], standardLogger)
 	if err != nil {
 		return err
@@ -69,7 +70,6 @@ func StartServer() {
 		WriteTimeout: time.Duration(serverEnv.WriteTimeout) * time.Second,
 		ReadTimeout:  time.Duration(serverEnv.ReadTimeout) * time.Second,
 	}
-	
 	go func() {
 		standardLogger.ServerEvent(fmt.Sprintf("server starting at %s", serverEnv.Address))
 		if err = srv.ListenAndServe(); err != nil { // starting server

@@ -20,3 +20,8 @@
    ```bash
    go run cmd/main.go
    ```
+
+   ```bash
+   docker build --tag daitya96/library-server .; docker rm --force server; docker run --name server --publish 8000:8000 daitya96/library-server
+   ```
+docker run -it --rm -p 8000:8000 daitya96/library-server /bin/ash

@@ -82,46 +82,46 @@ func GetRoutes(prefix string, config configs.Config) []Route {
 			HandlerFunction: RoutingContext{config, "WelcomeHandler"}.RouteToCorrespondingHandlerFunction,
 			MethodTypes:     []string{"GET"},
 		},
-		Route{
-			Path:            fmt.Sprintf("%s/book", prefix),
-			HandlerFunction: RoutingContext{config, "AddBookHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"POST"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/books", prefix),
-			HandlerFunction: RoutingContext{config, "GetBooksHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/bookByBookId", prefix),
-			HandlerFunction: RoutingContext{config, "GetBookByBookIdHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/bookByBookName", prefix),
-			HandlerFunction: RoutingContext{config, "GetBookByBookNameHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/bookByIsbn", prefix),
-			HandlerFunction: RoutingContext{config, "GetBookByIsbnHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/bookByPrice", prefix),
-			HandlerFunction: RoutingContext{config, "GetBookByPriceHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/bookByBookAuthorName", prefix),
-			HandlerFunction: RoutingContext{config, "GetBookByBookAuthorNameHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"GET"},
-		},
-		Route{
-			Path:            fmt.Sprintf("%s/books", prefix),
-			HandlerFunction: RoutingContext{config, "AddBooksHandler"}.RouteToCorrespondingHandlerFunction,
-			MethodTypes:     []string{"POST"},
-		},
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/book", prefix),
+		// 	HandlerFunction: RoutingContext{config, "AddBookHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"POST"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/books", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBooksHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/bookByBookId", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBookByBookIdHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/bookByBookName", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBookByBookNameHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/bookByIsbn", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBookByIsbnHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/bookByPrice", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBookByPriceHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/bookByBookAuthorName", prefix),
+		// 	HandlerFunction: RoutingContext{config, "GetBookByBookAuthorNameHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"GET"},
+		// },
+		// Route{
+		// 	Path:            fmt.Sprintf("%s/books", prefix),
+		// 	HandlerFunction: RoutingContext{config, "AddBooksHandler"}.RouteToCorrespondingHandlerFunction,
+		// 	MethodTypes:     []string{"POST"},
+		// },
 	}
 	return routes
 }
