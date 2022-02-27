@@ -1,9 +1,7 @@
-package server
+package app
 
 import (
 	"fmt"
-	"library-server/configs"
-	"library-server/internal/app/server/router"
 	"library-server/pkg/logger"
 	"log"
 	"net/http"
@@ -25,8 +23,8 @@ var errorMessage string
 var err error
 
 func runSideCar() (string, error) {
-	initializeLogger() // initializing standard logger
-	if err = getConfig(); err != nil { 	// getting configs
+	initializeLogger()                 // initializing standard logger
+	if err = getConfig(); err != nil { // getting configs
 		return errorMessage, err
 	}
 	serverEnv = new(ServerEnv)
@@ -43,7 +41,7 @@ func initializeLogger() {
 	standardLogger = logger.NewLogger()
 }
 
-func getConfig() (error) {
+func getConfig() error {
 	filePath, err := filepath.Abs("./configs/config.json") // loading configuration
 	if err != nil {
 		return err
@@ -56,19 +54,19 @@ func getConfig() (error) {
 }
 
 func StartServer() {
-	if errorMessage, err = runSideCar(); err != nil {	// running side car
+	if errorMessage, err = runSideCar(); err != nil { // running side car
 		log.Fatal(errorMessage)
 	}
-	
-	srv := &http.Server{	// initializing http server
-		Handler:      router.GetRouter(config.APIPrefix, config),	// initializing mux router
+
+	srv := &http.Server{ // initializing http server
+		Handler:      router.GetRouter(config.APIPrefix, config), // initializing mux router
 		Addr:         serverEnv.Address,
 		WriteTimeout: time.Duration(serverEnv.WriteTimeout) * time.Second,
 		ReadTimeout:  time.Duration(serverEnv.ReadTimeout) * time.Second,
 	}
 	standardLogger.ServerEvent(fmt.Sprintf("server starting at %s", serverEnv.Address))
 
-	if err = srv.ListenAndServe(); err != nil { 	// starting server
+	if err = srv.ListenAndServe(); err != nil { // starting server
 		standardLogger.Issue("couldn't start server")
 	}
 

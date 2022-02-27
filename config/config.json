@@ -1,0 +1,29 @@
+{
+    "server_config": {
+        "environment_type": "DEV",
+        "dev_env": {
+            "server_uri": "127.0.0.1",
+            "server_port": "8000",
+            "write_timeout": 15,
+            "read_timeout": 15,
+            "db_uri": ""
+        },
+        "stag_envs": {},
+        "prod_envs": {}
+    },
+    "application_config": {
+        "api_prefix": "/api/v1",
+        "levelled_logs" : {
+            "persistence_location": {
+                "container_directory": "logs",
+                "targetfile_name": "lb_system-",
+                "targetfile_extension": ".log"
+            },
+            "enable_logging_to_file": true,
+            "enable_logging_to_stdout": true,
+            "enable_colors": true,
+            "enable_full_timestamp": true,
+            "output_formatter": "text"
+        }
+    }
+}
