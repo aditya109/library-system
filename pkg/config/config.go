@@ -1,31 +1,36 @@
 package config
 
 import (
-	"log"
-	"os"
+	"encoding/json"
+	"io/ioutil"
 
 	"github.com/aditya109/library-system/internal/models"
 	"github.com/aditya109/library-system/pkg/helper"
-	"gopkg.in/yaml.v2"
+	logger "github.com/sirupsen/logrus"
 )
 
-// LoadConfiguration retrieves configuration from config file
-func LoadConfiguration() (*models.Config, error) {
-	var config models.Config
-	var configFilePath string = helper.GetAbsolutePath("/config/config.yaml")
-
-	configFile, err := os.Open(configFilePath)
+// GetConfiguration retrieves configuration from config file or environment configuration(TODO:)
+func GetConfiguration() (*models.Config, error) {
+	// declaring a config object
+	var config = models.Config{}
+	// getting the absolute file path of the config file
+	var configFilePath, err = helper.GetAbsolutePath("/config/config.json")
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		logger.Error(err)
+		return &models.Config{}, err
 	}
-	defer configFile.Close()
 
-	decoder := yaml.NewDecoder(configFile)
-	err = decoder.Decode(&config)
+	configFile, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		logger.Error(err)
+		return &models.Config{}, err
+	}
+
+	// storing the content of config file in a config object
+	err = json.Unmarshal(configFile, &config)
+	if err != nil {
+		logger.Error(err)
+		return &models.Config{}, err
 	}
 	return &config, nil
 }

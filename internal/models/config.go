@@ -16,11 +16,12 @@ type ServerConfig struct {
 
 // Envs contains all the environment variables which is used in the dev setup.
 type Envs struct {
-	ServerUri    string `json:"server_uri,omitempty"`    // ServerUri defines the uri at which server is initiated.
-	ServerPort   string `json:"server_port,omitempty"`   // ServerPort defines the port at which server is initiated.
-	WriteTimeout int    `json:"write_timeout,omitempty"` // WriteTimeout defines the write timeout for the server.
-	ReadTimeout  int    `json:"read_timeout,omitempty"`  // ReadTimeout defines the read timeout for the server.
-	DBUri        string `json:"db_uri,omitempty"`        // DBUri defines the uri for the database.
+	ServerUri    string `json:"server_uri,omitempty"`     // ServerUri defines the uri at which server is initiated.
+	ServerPort   string `json:"server_port,omitempty"`    // ServerPort defines the port at which server is initiated.
+	WriteTimeout int    `json:"write_timeout,omitempty"`  // WriteTimeout defines the write timeout for the server.
+	ReadTimeout  int    `json:"read_timeout,omitempty"`   // ReadTimeout defines the read timeout for the server.
+	IsTLSEnabled bool   `json:"is_tls_enabled,omitempty"` // IsTLSEnabled specifies if TLS is to be enabled.
+	DBUri        string `json:"db_uri,omitempty"`         // DBUri defines the uri for the database.
 }
 
 // ApplicationConfig contains application-related configuration.
@@ -41,7 +42,7 @@ type LevelledLogs struct {
 
 // PersistenceLocation contains file-system-related configurations.
 type PersistenceLocation struct {
-	ContainerDirectory  string `json:"container_directory,omitempty"`
-	TargetFileName      string `json:"targetfile_name,omitempty"`
-	TargetFileExtension string `json:"targetfile_extension,omitempty"`
+	ContainerDirectory  string   `json:"container_directory,omitempty"`
+	TargetFileName      []string `json:"targetfile_name,omitempty"`
+	TargetFileExtension string   `json:"targetfile_extension,omitempty"`
 }

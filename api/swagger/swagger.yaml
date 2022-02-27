@@ -1,0 +1,78 @@
+definitions:
+  Item:
+    description: Item defines the structure of an API item
+    properties:
+      ID:
+        format: int64
+        type: integer
+      Name:
+        type: string
+    type: object
+    x-go-package: github.com/aditya109/library-system/internal/models
+info: {}
+paths:
+  /:
+    get:
+      description: Returns a welcome message
+      operationId: welcome
+      responses:
+        "200":
+          $ref: '#/responses/WelcomeResponse'
+      tags:
+      - home
+  /docs:
+    get:
+      description: Returns swagger specification uunder OpenAPIv3 documeted APIs
+      operationId: swaggerDocumentation
+      tags:
+      - docs
+  /item:
+    get:
+      description: Returns items filtered by query parameters from the existing list
+        of items
+      operationId: listFilteredItems
+      responses:
+        "200":
+          $ref: '#/responses/GetWithQueryParamsReponse'
+      tags:
+      - item
+  /item/{id}:
+    get:
+      description: Returns an item with id from the existing list of items
+      operationId: listItemById
+      responses:
+        "200":
+          $ref: '#/responses/GetItemWithIdReponse'
+      tags:
+      - item
+  /items:
+    get:
+      description: Returns a list of items, no query params required
+      operationId: listItems
+      responses:
+        "200":
+          $ref: '#/responses/GetItemsResponse'
+      tags:
+      - items
+responses:
+  GetItemWithIdResponse:
+    description: GetItemWithIDResponseWrapper is an item returned in response
+    schema:
+      $ref: '#/definitions/Item'
+  GetItemWithQueryParamResponse:
+    description: GetItemWithQueryParamResponseWrapper is an item returned in response
+    schema:
+      items:
+        $ref: '#/definitions/Item'
+      type: array
+  GetItemsResponse:
+    description: GetItemsResponseWrapper is a list of items returned in the response
+    schema:
+      items:
+        $ref: '#/definitions/Item'
+      type: array
+  WelcomeResponse:
+    description: WelcomeResponseWrapper is a welcome response shown on / URL
+    schema:
+      type: string
+swagger: "2.0"
