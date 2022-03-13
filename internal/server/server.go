@@ -83,21 +83,21 @@ func getApplicableEnvironmentVariablesFromConfig() {
 
 // setHTTPPortFromConfigObject sets httpPort variable to port mentioned in the config object
 func setHTTPPortFromConfigObject() {
-	httpPort = envs.ServerPort
+	httpPort = envs.ServerEnv.Port
 }
 
 // setEndpointFromConfigObject sets endpoint IP from config object
 func setEndpointFromConfigObject() {
-	if envs.IsTLSEnabled {
+	if envs.ServerEnv.IsTLSEnabled {
 		prefix = "https"
 	} else {
 		prefix = "http"
 	}
-	endpoint = fmt.Sprintf("%s:%s", envs.ServerUri, httpPort)
+	endpoint = fmt.Sprintf("%s:%s", envs.ServerEnv.Uri, httpPort)
 }
 
 // setTimeoutsFromConfigObject sets writeTimeout and readTimeout from config object
 func setTimeoutsFromConfigObject() {
-	writeTimeout = time.Duration(envs.WriteTimeout) * time.Second
-	readTimeout = time.Duration(envs.ReadTimeout) * time.Second
+	writeTimeout = time.Duration(envs.ServerEnv.WriteTimeout) * time.Second
+	readTimeout = time.Duration(envs.ServerEnv.ReadTimeout) * time.Second
 }

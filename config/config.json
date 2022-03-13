@@ -2,12 +2,19 @@
   "server_config": {
     "environment_type": "DEV",
     "dev_env": {
-      "server_uri": "127.0.0.1",
-      "server_port": "8000",
-      "write_timeout": 15,
-      "read_timeout": 15,
-      "enable_tls": false,
-      "db_uri": ""
+      "server": {
+        "uri": "127.0.0.1",
+        "port": "8000",
+        "write_timeout": 15,
+        "read_timeout": 15,
+        "enable_tls": false
+      },
+      "db": {
+        "uri": "127.0.0.1",
+        "port": "3306",
+        "username": "user",
+        "password": "password"
+      }
     },
     "stag_envs": {},
     "prod_envs": {}

@@ -31,40 +31,6 @@ var routeList = routes{
 		h.WelcomeHandler,
 		nil,
 	},
-	// swagger:route GET /items items listItems
-	// Returns a list of items, no query params required
-	// responses:
-	// 	200: GetItemsResponse
-	Route{
-		"GetItems",
-		"GET",
-		"/items",
-		h.GetItemsHandler,
-		nil,
-	},
-	// swagger:route GET /item/{id} item listItemById
-	// Returns an item with id from the existing list of items
-	// responses:
-	// 	200: GetItemWithIdReponse
-	Route{
-		"GetItemWithId",
-		"GET",
-		"/item/{id}",
-		h.GetItemWithIDHandler,
-		nil,
-	},
-
-	// swagger:route GET /item item listFilteredItems
-	// Returns items filtered by query parameters from the existing list of items
-	// responses:
-	// 	200: GetWithQueryParamsReponse
-	Route{
-		"GetWithQueryParams",
-		"GET",
-		"/item",
-		h.GetWithQueryParamsHandler,
-		nil,
-	},
 
 	// swagger:route GET /docs docs swaggerDocumentation
 	// Returns swagger specification uunder OpenAPIv3 documeted APIs
@@ -77,12 +43,23 @@ var routeList = routes{
 			SpecURL: "/swagger.yaml",
 		}, nil),
 	},
-
 	Route{
 		"Swagger JSON",
 		"GET",
 		"/swagger.yaml",
 		nil,
 		http.FileServer(http.Dir("./api/swagger")),
+	},
+
+	// swagger:route GET /items items listItems
+	// Returns a list of items, no query params required
+	// responses:
+	// 	200: GetItemsResponse
+	Route{
+		"GetItems",
+		"GET",
+		"/items",
+		h.GetItemsHandler,
+		nil,
 	},
 }
